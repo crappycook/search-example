@@ -4,10 +4,12 @@ import (
 	"context"
 	"gosearcher/model"
 	"gosearcher/search"
+	"strconv"
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
@@ -37,12 +39,13 @@ func SearchBooks(c context.Context, ctx *app.RequestContext) {
 
 	query := search.BookCli.BuildShouldQuery(searchFields)
 	searchReq := bleve.NewSearchRequest(query)
-	// sort by id desc
-	searchReq.SortBy([]string{"-id"})
+	// sort by doc _id desc
+	searchReq.SortBy([]string{"-_id"})
 	searchReq.Size = req.Size
 	searchReq.From = req.From
-	searchReq.Fields = []string{"id"}
+	searchReq.Fields = []string{"*"}
 	searchResults, err := search.BookCli.Search(searchReq)
+	hlog.Infof("query took: %v", searchResults.Took)
 	if err != nil {
 		ctx.JSON(consts.StatusBadRequest, utils.H{"message": err})
 		return
@@ -51,8 +54,8 @@ func SearchBooks(c context.Context, ctx *app.RequestContext) {
 	ids := make([]int64, 0, searchResults.Total)
 	if searchResults.Total > 0 {
 		for _, hit := range searchResults.Hits {
-			id := hit.Fields["id"].(float64)
-			ids = append(ids, int64(id))
+			id, _ := strconv.ParseInt(hit.ID, 10, 64)
+			ids = append(ids, id)
 		}
 	}
 

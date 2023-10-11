@@ -1,34 +1,30 @@
 package search
 
-import "gosearcher/model"
+import (
+	"encoding/json"
+	"gosearcher/model"
+	"os"
+)
+
+var (
+	DataPath = "data"
+)
 
 func GetLocalBooks() map[int64]*model.Book {
-	data := map[int64]*model.Book{
-		1: {
-			Id:   1,
-			Name: "Network",
-			Tags: "cs new",
-		},
-		2: {
-			Id:   2,
-			Name: "Operating System",
-			Tags: "cs",
-		},
-		3: {
-			Id:   3,
-			Name: "442",
-			Tags: "new football",
-		},
-		4: {
-			Id:   4,
-			Name: "Math",
-			Tags: "science",
-		},
-		5: {
-			Id:   5,
-			Name: "Deep Learning",
-			Tags: "science new",
-		},
+	content, err := os.ReadFile(DataPath + "/books.json")
+	if err != nil {
+		panic(err)
 	}
-	return data
+
+	var books []*model.Book
+	err = json.Unmarshal(content, &books)
+	if err != nil {
+		panic(err)
+	}
+
+	result := make(map[int64]*model.Book, len(books))
+	for _, v := range books {
+		result[v.Id] = v
+	}
+	return result
 }

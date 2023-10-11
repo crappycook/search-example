@@ -5,3 +5,9 @@ type Book struct {
 	Name string `json:"name"`
 	Tags string `json:"tags"`
 }
+
+// A bleveClassifier is an interface describing any object which knows how
+// to identify its own type.
+func (b *Book) BleveType() string {
+	return "book"
+}

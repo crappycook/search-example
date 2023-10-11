@@ -12,5 +12,5 @@ var (
 func Init() {
 	ctx := context.Background()
 	BookCli = NewBookSearchClient(time.Second * 10)
-	BookCli.Run(ctx)
+	go BookCli.Run(ctx)
 }

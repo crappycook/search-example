@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/blevesearch/bleve/v2"
-	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
+	"github.com/blevesearch/bleve/v2/analysis/lang/en"
 	"github.com/blevesearch/bleve/v2/mapping"
 	"github.com/blevesearch/bleve/v2/search/query"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type BookSearchClient struct {
 	interval     time.Duration
 	index        bleve.Index
 	indexMapping *mapping.IndexMappingImpl
-	// documentMapping *mapping.DocumentMapping
 }
 
 // 搜索字段
@@ -24,8 +24,16 @@ type SearchField struct {
 }
 
 func NewBookSearchClient(interval time.Duration) *BookSearchClient {
+	docMapping := bleve.NewDocumentMapping()
+	newTextMapping := bleve.NewTextFieldMapping()
+	newTextMapping.Analyzer = en.AnalyzerName
+	docMapping.AddFieldMappingsAt("id", newTextMapping)
+	docMapping.AddFieldMappingsAt("tags", newTextMapping)
+
 	indexMapping := bleve.NewIndexMapping()
-	indexMapping.DefaultAnalyzer = simple.Name
+	indexMapping.DefaultAnalyzer = en.AnalyzerName
+	indexMapping.AddDocumentMapping("book", docMapping)
+
 	index, err := bleve.NewMemOnly(indexMapping)
 	if err != nil {
 		panic(err)
@@ -73,15 +81,17 @@ func (client *BookSearchClient) Search(req *bleve.SearchRequest) (*bleve.SearchR
 func (client *BookSearchClient) Run(ctx context.Context) {
 	ticker := time.NewTicker(client.interval)
 	defer ticker.Stop()
+	hlog.Info("BookSearchClient is running.")
 
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				client.RebuildIndex()
-			}
+	for {
+		select {
+		case <-ctx.Done():
+			hlog.Info("BookSearchClient Done.")
+			return
+		case <-ticker.C:
+			now := time.Now()
+			hlog.Infof("rebuild book index at: %v", now.Unix())
+			client.RebuildIndex()
 		}
-	}()
+	}
 }
