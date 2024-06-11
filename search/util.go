@@ -28,3 +28,8 @@ func GetLocalBooks() map[int64]*model.Book {
 	}
 	return result
 }
+
+func JsonCompact(val any) string {
+	b, _ := json.Marshal(val)
+	return string(b)
+}

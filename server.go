@@ -18,6 +18,7 @@ func (s *HTTPServer) Run() {
 	v1 := h.Group("/api/v1")
 	v1.GET("/ping", handlers.Ping)
 	v1.GET("/search/book", handlers.SearchBooks)
+	v1.GET("/search/book/fuzzy", handlers.FuzzySearchBooks)
 
 	h.Spin()
 }
