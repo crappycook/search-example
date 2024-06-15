@@ -92,20 +92,20 @@ func FuzzySearchBooks(c context.Context, ctx *app.RequestContext) {
 		authorQuery := bleve.NewWildcardQuery("*" + req.Keyword + "*")
 		authorQuery.SetField("author")
 
-		nameQuery := bleve.NewBooleanQuery()
-		for _, v := range req.Keyword {
-			q := bleve.NewTermQuery(string(v))
-			q.SetField("name")
-			nameQuery.AddMust(q)
-		}
+		// nameQuery := bleve.NewBooleanQuery()
+		// for _, v := range req.Keyword {
+		// 	q := bleve.NewTermQuery(string(v))
+		// 	q.SetField("name")
+		// 	nameQuery.AddMust(q)
+		// }
 
-		nqw := bleve.NewWildcardQuery("*" + req.Keyword + "*")
-		nqw.SetField("name")
+		nameWildcardQuery := bleve.NewWildcardQuery("*" + req.Keyword + "*")
+		nameWildcardQuery.SetField("name")
 
 		boolQuery := bleve.NewBooleanQuery()
 		boolQuery.AddShould(authorQuery)
-		boolQuery.AddShould(nameQuery)
-		boolQuery.AddShould(nqw)
+		// boolQuery.AddShould(nameQuery)
+		boolQuery.AddShould(nameWildcardQuery)
 		hlog.Infof("query: %v", search.JsonCompact(boolQuery))
 		query = boolQuery
 	}

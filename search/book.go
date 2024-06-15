@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/blevesearch/bleve/v2"
-	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
 	"github.com/blevesearch/bleve/v2/analysis/lang/en"
 	"github.com/blevesearch/bleve/v2/mapping"
 	"github.com/blevesearch/bleve/v2/search/query"
@@ -30,9 +30,10 @@ func NewBookSearchClient(interval time.Duration) *BookSearchClient {
 	newTextMapping.Analyzer = en.AnalyzerName
 	docMapping.AddFieldMappingsAt("id", newTextMapping)
 	docMapping.AddFieldMappingsAt("tags", newTextMapping)
-	standardTextMapping := bleve.NewTextFieldMapping()
-	standardTextMapping.Analyzer = standard.Name
-	docMapping.AddFieldMappingsAt("name", standardTextMapping)
+	simpleTextMapping := bleve.NewTextFieldMapping()
+	simpleTextMapping.Analyzer = simple.Name
+	// simple 兼容中文和英文
+	docMapping.AddFieldMappingsAt("name", simpleTextMapping)
 	docMapping.AddFieldMappingsAt("author", newTextMapping)
 
 	indexMapping := bleve.NewIndexMapping()
