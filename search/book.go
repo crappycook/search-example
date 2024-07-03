@@ -7,7 +7,7 @@ import (
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
-	"github.com/blevesearch/bleve/v2/analysis/lang/en"
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"
 	"github.com/blevesearch/bleve/v2/mapping"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -27,7 +27,7 @@ type SearchField struct {
 func NewBookSearchClient(interval time.Duration) *BookSearchClient {
 	docMapping := bleve.NewDocumentMapping()
 	newTextMapping := bleve.NewTextFieldMapping()
-	newTextMapping.Analyzer = en.AnalyzerName
+	newTextMapping.Analyzer = standard.Name
 	docMapping.AddFieldMappingsAt("id", newTextMapping)
 	docMapping.AddFieldMappingsAt("tags", newTextMapping)
 	simpleTextMapping := bleve.NewTextFieldMapping()
@@ -37,7 +37,7 @@ func NewBookSearchClient(interval time.Duration) *BookSearchClient {
 	docMapping.AddFieldMappingsAt("author", newTextMapping)
 
 	indexMapping := bleve.NewIndexMapping()
-	indexMapping.DefaultAnalyzer = en.AnalyzerName
+	indexMapping.DefaultAnalyzer = standard.Name
 	indexMapping.AddDocumentMapping("book", docMapping)
 
 	index, err := bleve.NewMemOnly(indexMapping)
